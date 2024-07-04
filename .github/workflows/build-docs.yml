@@ -1,9 +1,13 @@
 name: build PyQGIS API docs
 
+concurrency:
+  group: ${{ github.workflow }}-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: false
+
 on:
   schedule:
-    # runs every day
-    - cron: '0 0 * * *'
+    # runs once a week
+    - cron: '0 0 * * 0'
 
   push:
     branches:
@@ -28,6 +32,7 @@ jobs:
 
       - shell: python
         id: version
+        name: determine version
         run: |
           import yaml, os
           def set_output(name, value):
@@ -41,7 +46,9 @@ jobs:
             'ltr': cfg['current_ltr'],
             'master': 'master'
           }
-          set_output('version', versions['${{ matrix.qgis_version }}'])
+          version = versions['${{ matrix.qgis_version }}']
+          print(f'version: {version}')
+          set_output('version', version)
 
       - name: Build PyQGIS docs
         env:
