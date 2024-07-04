@@ -13,35 +13,70 @@ on:
     branches:
       - master
 
-  workflow_dispatch:
-    # to manually trigger the build for a given branch
-    # POST /repos/qgis/pyqgis/actions/workflows/2246440/dispatches
-    inputs:
-      qgis_branch:
-        description: 'The QGIS branch'
-        required: true
-        default: 'master'
-      home:
-        description: 'location'
-        required: false
-
 
 jobs:
   build-docs:
-    name: Build PyQGIS docs for ${{ github.event.inputs.qgis_branch || 'master' }}
+    name: Build PyQGIS docs
     runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        qgis_version: [ 'master', 'stable', 'ltr' ]
+
     steps:
       - uses: actions/checkout@v4
+
+      - shell: python
+        id: version
+        run: |
+          import yaml, os
+          def set_output(name, value):
+            with open(os.environ['GITHUB_OUTPUT'], 'a') as fh:
+                print(f'{name}={value}', file=fh)
+          with open('pyqgis_conf.yml', 'r') as f:
+              cfg = yaml.safe_load(f)
+          version_list = cfg['version_list'].replace(' ', '').split(',')
+          versions = {
+            'stable': version_list[1],
+            'ltr': cfg['current_ltr'],
+            'master': 'master'
+          }
+          set_output('version', versions['${{ matrix.qgis_version }}'])
+
       - name: Build PyQGIS docs
         env:
-          QGIS_VERSION_BRANCH: ${{ github.event.inputs.qgis_branch || 'master' }}
+          QGIS_VERSION:  ${{ steps.version.outputs.version }}
           GH_TOKEN: ${{ secrets.GH_TOKEN }}
           PUBLISH: true
           RUNS_ON_CI: true
           BUILD_TESTING: ${{ github.event_name == 'pull_request' && github.event.pull_request.number || false }}
         run: |
-          echo "QGIS_VERSION_BRANCH: ${QGIS_VERSION_BRANCH}"
+          echo "QGIS_VERSION: ${QGIS_VERSION}"
           echo "PUBLISH: ${PUBLISH}"
           echo "BUILD_TESTING: ${BUILD_TESTING}"
           ./scripts/run-docker.sh
+          
+      - name: "Initialize matrix lock to publish only one version at once"
+        if: matrix.qgis_version == 'master'
+        uses: rakles/matrix-lock@v1.0.0
+        with:
+          step: init
+          order: "master,stable,ltr"
 
+      - name: "Wait for matrix lock"
+        uses: rakles/matrix-lock@v1.0.0
+        with:
+          step: wait
+          id: ${{ matrix.qgis_version }}
+
+      - name: Publish
+        run: |
+          if [[ ${PUBLISH} != "false" ]]; then
+            ./scripts/publish-docs.sh ${QGIS_VERSION} ${DIR}/build/${QGIS_VERSION}/html
+          fi
+
+      - name: "Continue matrix lock"
+        uses: rakles/matrix-lock@v1.0.0
+        with:
+          step: continue
+          id: ${{ matrix.qgis_version }}

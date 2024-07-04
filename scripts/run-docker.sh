@@ -17,10 +17,8 @@ DIR=$(git rev-parse --show-toplevel)
 
 pushd ${DIR}
 
-QGIS_DOCKER_TAG="${QGIS_VERSION_BRANCH//master/latest}"
+QGIS_DOCKER_TAG="${QGIS_VERSION//master/latest}"
 
-# latest => master, final-3_0_2 => 3.0
-QGIS_VERSION=$(${GP}sed -r 's/latest/master/; s/^(final|release)-([0-9]_[0-9]+)(_[0-9]+)?/\2/; s/_/./g' <<< "${QGIS_DOCKER_TAG}")
 echo "QGIS Docker tag: ${QGIS_DOCKER_TAG}"
 echo "Building for QGIS: ${QGIS_VERSION}"
 
@@ -48,9 +46,5 @@ mkdir -p ${DIR}/build
 mkdir -p ${DIR}/build/${QGIS_VERSION}
 CONTAINER_ID=$(docker ps -aqf "name=pyqgis")
 docker cp ${CONTAINER_ID}:/root/pyqgis/build/${QGIS_VERSION}/html ${DIR}/build/${QGIS_VERSION}
-
-if [[ ${PUBLISH} != "false" ]]; then
-  ./scripts/publish-docs.sh ${QGIS_VERSION} ${DIR}/build/${QGIS_VERSION}/html
-fi
 
 popd
