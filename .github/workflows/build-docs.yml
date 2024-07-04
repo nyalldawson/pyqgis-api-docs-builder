@@ -55,7 +55,6 @@ jobs:
         if: ${{ github.event_name != 'pull_request' || matrix.qgis_version == 'master' }}
         env:
           RUNS_ON_CI: true
-          BUILD_OPTIONS: '-c QgsVectorLayer -c QgsFeature'  # TODO: REMOVE!!!!
         run: |
           echo "QGIS_VERSION: ${QGIS_VERSION}"
           echo "BUILD_TESTING: ${BUILD_TESTING}"
