@@ -103,7 +103,3 @@ jobs:
           if [[ ${PUBLISH} != "false" ]]; then
             ./scripts/publish-docs.sh ${VERSIONS}
           fi
-
-      - name: tmate
-        uses: mxschmitt/action-tmate@v3
-        if: always()
