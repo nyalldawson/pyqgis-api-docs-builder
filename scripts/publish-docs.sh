@@ -21,7 +21,7 @@ pushd publish
 
 echo "*** Clone gh-pages branch"
 OUTPUT=${QGIS_VERSION}
-if [[ ${RUNS_ON_CI} =~ true ]]; then
+if [[ -z ${GITHUB_RUN_ID} ]]; then
   git config --global user.email "qgisninja@gmail.com"
   git config --global user.name "Geo-Ninja"
   git clone https://${GH_TOKEN}@github.com/qgis/pyqgis.git --depth 100 --branch gh-pages
@@ -65,7 +65,7 @@ echo "*** Add and push"
 git add --all
 git commit -m "Update docs for QGIS ${QGIS_VERSION}"
 echo "##[endgroup]"
-if [[ ${RUNS_ON_CI} =~ true ]]; then
+if [[ -z ${GITHUB_RUN_ID} ]]; then
   echo "pushing from CI without confirmation"
   git push -f
 else
