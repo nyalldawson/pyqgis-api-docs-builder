@@ -38,9 +38,9 @@ jobs:
         run: |
           import yaml, os
           def add_to_env_and_outputs(name, value):
-          for var in ('GITHUB_OUTPUT', 'GITHUB_ENV'): 
-              with open(os.environ[var], 'a') as fh:
-                  print(f'{name}={value}', file=fh)
+              for var in ('GITHUB_OUTPUT', 'GITHUB_ENV'): 
+                  with open(os.environ[var], 'a') as fh:
+                      print(f'{name}={value}', file=fh)
           
           with open('pyqgis_conf.yml', 'r') as f:
               cfg = yaml.safe_load(f)
@@ -54,8 +54,8 @@ jobs:
           versions_list = '("' + '" "'.join(versions) + '")'
           print(f'version: {version}')
           print(f'versions list: {versions_list}')
-          add_to_env('QGIS_VERSION', version)
-          add_to_env('QGIS_VERSIONS_LIST', versions_list)
+          add_to_env_and_outputs('QGIS_VERSION', version)
+          add_to_env_and_outputs('QGIS_VERSIONS_LIST', versions_list)
 
       - name: Build PyQGIS docs
         if: ${{ github.event_name != 'pull_request' || matrix.qgis_version == 'master' }}
