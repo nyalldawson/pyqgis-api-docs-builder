@@ -35,7 +35,6 @@ fi
 
 if [[ -n ${FIX_VERSION} ]]; then
   echo "fixing versions...."
-  IFS=', ' read -r -a VERSIONS <<< $(${GP}sed -n 's/version_list: //p' ../../pyqgis_conf.yml)
   HTML=""
   for v in "${VERSIONS[@]}"; do
     HTML="${HTML}\n      \n        <dd><a href=\"https://qgis.org/pyqgis/${v}\">${v}</a></dd>"
