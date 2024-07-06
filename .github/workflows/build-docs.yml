@@ -84,21 +84,18 @@ jobs:
         uses: actions/download-artifact@v4
         with:
           name: master
-          path: html
 
       - name: Get artifact for stable
         if: ${{ github.event_name != 'pull_request' }}
         uses: actions/download-artifact@v4
         with:
           name: stable
-          path: html
 
       - name: Get artifact for ltr
         if: ${{ github.event_name != 'pull_request' }}
         uses: actions/download-artifact@v4
         with:
           name: ltr
-          path: html
 
       - name: Push to git
         env:
@@ -106,6 +103,7 @@ jobs:
           VERSIONS: ${{ github.event_name == 'pull_request' && '("master")' || needs.build-docs.outputs.QGIS_VERSIONS_LIST }}
           GH_TOKEN: ${{ secrets.GH_TOKEN }}
         run: |
+          echo $(ls -l)
           if [[ ${PUBLISH} != "false" ]]; then
             ./scripts/publish-docs.sh ${VERSIONS}
           fi
