@@ -26,8 +26,10 @@ if [[ -n ${GITHUB_RUN_ID} ]]; then
   git config --global user.name "Geo-Ninja"
   git clone https://${GH_TOKEN}@github.com/qgis/pyqgis.git --depth 100 --branch gh-pages
   pushd pyqgis
+  # merge commit to lower repo size
   git reset --hard HEAD~99
   git merge --squash HEAD@{1}
+  git commit -m "Update docs"
 else
   git clone git@github.com:qgis/pyqgis.git --depth 1 --branch gh-pages
   pushd pyqgis
@@ -63,7 +65,7 @@ fi
 echo "##[group] Git commit"
 echo "*** Add and push"
 git add --all
-git commit -m "Update docs for QGIS ${QGIS_VERSION}"
+git commit -m "Update docs"
 echo "##[endgroup]"
 if [[ -n ${GITHUB_RUN_ID} ]]; then
   echo "pushing from CI without confirmation"
