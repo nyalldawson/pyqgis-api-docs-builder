@@ -51,13 +51,13 @@ else
   if [[ ${BUILD_TESTING} -ne false ]]; then
      echo "create folder for PR with master only"
      mkdir "PR${BUILD_TESTING}"
-     cp -R html/master/* PR${BUILD_TESTING}/
+     cp -R ../html/master/* PR${BUILD_TESTING}/
   else
     for VERSION in "${VERSIONS[@]}"; do
       echo "get ${VERSION}"
       rm -rf ${VERSION}
       mkdir "${VERSION}"
-      cp -R html/${VERSION}/* ${VERSION}/
+      cp -R ../html/${VERSION}/* ${VERSION}/
     done
   fi
 fi
