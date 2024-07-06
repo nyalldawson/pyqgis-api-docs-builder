@@ -51,7 +51,7 @@ jobs:
             'master': 'master'
           }
           version = versions['${{ matrix.qgis_version }}']
-          versions_list = '("' + '" "'.join(versions) + '")'
+          versions_list = ','.join(versions)
           print(f'version: {version}')
           print(f'versions list: {versions_list}')
           add_to_env_and_outputs('QGIS_VERSION', version)

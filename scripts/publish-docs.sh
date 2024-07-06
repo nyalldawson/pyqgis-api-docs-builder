@@ -2,8 +2,8 @@
 
 set -e
 
-VERSIONS=$1
-
+IFS=', ' read -r -a VERSIONS <<< "$1"
+echo "versions: ${VERSIONS}"
 
 # GNU prefix command for mac os support (gsed, gsplit)
 GP=
