@@ -46,8 +46,8 @@ jobs:
               cfg = yaml.safe_load(f)
           version_list = cfg['version_list'].replace(' ', '').split(',')
           versions = {
-            'stable': version_list[1],
-            'ltr': cfg['current_ltr'],
+            'stable': str(version_list[1]),
+            'ltr': str(cfg['current_ltr']),
             'master': 'master'
           }
           version = versions['${{ matrix.qgis_version }}']
