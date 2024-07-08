@@ -44,13 +44,13 @@ jobs:
           for var in "${vars[@]}"; do
             echo "${var}=${!var}"
             echo "${var}=${!var}" >> "$GITHUB_OUTPUT"
-            echo "${var}=${!var}" >> "GITHUB_ENV"
+            echo "${var}=${!var}" >> "$GITHUB_ENV"
           done
 
       - name: Build PyQGIS docs
         if: ${{ github.event_name != 'pull_request' || matrix.qgis_version == 'master' }}
         run: |
-          ./scripts/run-docker.sh -v ${{ env.QGIS_VERSION }}
+          ./scripts/run-docker.sh -v ${QGIS_VERSION}
 
       - uses: actions/upload-artifact@v4
         if: ${{ github.event_name != 'pull_request' || matrix.qgis_version == 'master' }}
