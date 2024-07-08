@@ -32,12 +32,16 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
+      - uses: mikefarah/yq@master
+        with:
+          cmd: yq
+
       - id: version
         name: determine version
         run: |
-          wget https://github.com/mikefarah/yq/releases/latest/download/yq_linux_amd64
-          QGIS_CURRENT_LTR=$(yq_linux_amd64 .current_ltr pyqgis_conf.yml)
-          QGIS_CURRENT_STABLE=$(yq_linux_amd64 .current_stable pyqgis_conf.yml)
+          wget https://github.com/mikefarah/yq/releases/latest/download/yq_linux_amd64 -O yq && chmod +x yq
+          QGIS_CURRENT_LTR=$(yq .current_ltr pyqgis_conf.yml)
+          QGIS_CURRENT_STABLE=$(yq .current_stable pyqgis_conf.yml)
           QGIS_VERSION=$(yq_linux_amd64 --exit-status .${{ matrix.qgis_version }} pyqgis_conf.yml) || a=$(echo "master")
 
           fruits=("QGIS_VERSION" "QGIS_CURRENT_STABLE" "QGIS_CURRENT_LTR")
