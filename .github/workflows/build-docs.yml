@@ -50,7 +50,7 @@ jobs:
       - name: Build PyQGIS docs
         if: ${{ github.event_name != 'pull_request' || matrix.qgis_version == 'master' }}
         run: |
-          ./scripts/run-docker.sh -v ${QGIS_VERSION}
+          ./scripts/run-docker.sh -v ${{ env.QGIS_VERSION }}
 
       - uses: actions/upload-artifact@v4
         if: ${{ github.event_name != 'pull_request' || matrix.qgis_version == 'master' }}
