@@ -32,21 +32,20 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
-      - uses: actions/setup-go@v5
-
       - id: version
         name: determine version
         run: |
-          go install github.com/mikefarah/yq/v4@latest
-          QGIS_CURRENT_LTR=$(yq .current_ltr pyqgis_conf.yml)
-          QGIS_CURRENT_STABLE=$(yq .current_stable pyqgis_conf.yml)
-          QGIS_VERSION=$(yq --exit-status .${{ matrix.qgis_version }} pyqgis_conf.yml) || a=$(echo "master")
+          wget https://github.com/mikefarah/yq/releases/latest/download/yq_linux_amd64
+          QGIS_CURRENT_LTR=$(yq_linux_amd64 .current_ltr pyqgis_conf.yml)
+          QGIS_CURRENT_STABLE=$(yq_linux_amd64 .current_stable pyqgis_conf.yml)
+          QGIS_VERSION=$(yq_linux_amd64 --exit-status .${{ matrix.qgis_version }} pyqgis_conf.yml) || a=$(echo "master")
 
           fruits=("QGIS_VERSION" "QGIS_CURRENT_STABLE" "QGIS_CURRENT_LTR")
           for var in "${vars[@]}"; do
             echo "${var}=${!var}"
             echo "${var}=${!var}" >> "$GITHUB_OUTPUT"
             echo "${var}=${!var}" >> "GITHUB_ENV"
+          done
 
       - name: Build PyQGIS docs
         if: ${{ github.event_name != 'pull_request' || matrix.qgis_version == 'master' }}
