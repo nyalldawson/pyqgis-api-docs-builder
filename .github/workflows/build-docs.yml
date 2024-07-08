@@ -32,19 +32,15 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
-      - uses: mikefarah/yq@master
-        with:
-          cmd: yq
-
       - id: version
         name: determine version
         run: |
           wget https://github.com/mikefarah/yq/releases/latest/download/yq_linux_amd64 -O yq && chmod +x yq
           QGIS_CURRENT_LTR=$(yq .current_ltr pyqgis_conf.yml)
           QGIS_CURRENT_STABLE=$(yq .current_stable pyqgis_conf.yml)
-          QGIS_VERSION=$(yq --exit-status .${{ matrix.qgis_version }} pyqgis_conf.yml) || a=$(echo "master")
+          QGIS_VERSION=$(yq --exit-status .${{ matrix.qgis_version }} pyqgis_conf.yml) || QGIS_VERSION=$(echo "master")
 
-          fruits=("QGIS_VERSION" "QGIS_CURRENT_STABLE" "QGIS_CURRENT_LTR")
+          vars=("QGIS_VERSION" "QGIS_CURRENT_STABLE" "QGIS_CURRENT_LTR")
           for var in "${vars[@]}"; do
             echo "${var}=${!var}"
             echo "${var}=${!var}" >> "$GITHUB_OUTPUT"
