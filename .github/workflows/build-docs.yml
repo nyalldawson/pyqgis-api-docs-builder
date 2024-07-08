@@ -32,39 +32,26 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
-      - shell: python
-        id: version
+      - uses: actions/setup-go@v5
+
+      - id: version
         name: determine version
         run: |
-          import yaml, os
-          def add_to_env_and_outputs(name, value):
-              for var in ('GITHUB_OUTPUT', 'GITHUB_ENV'):
-                  with open(os.environ[var], 'a') as fh:
-                      print(f'{name}={value}', file=fh)
+          go install github.com/mikefarah/yq/v4@latest
+          QGIS_CURRENT_LTR=$(yq .current_ltr pyqgis_conf.yml)
+          QGIS_CURRENT_STABLE=$(yq .current_stable pyqgis_conf.yml)
+          QGIS_VERSION=$(yq --exit-status .${{ matrix.qgis_version }} pyqgis_conf.yml) || a=$(echo "master")
 
-          with open('pyqgis_conf.yml', 'r') as f:
-              cfg = yaml.safe_load(f)
-          version_list = cfg['version_list'].replace(' ', '').split(',')
-          versions = {
-            'stable': str(version_list[1]),
-            'ltr': str(cfg['current_ltr']),
-            'master': 'master'
-          }
-          version = versions['${{ matrix.qgis_version }}']
-          versions_list = ','.join(versions.values())
-          print(f'version: {version}')
-          print(f'versions list: {versions_list}')
-          add_to_env_and_outputs('QGIS_VERSION', version)
-          add_to_env_and_outputs('QGIS_VERSIONS_LIST', versions_list)
+          fruits=("QGIS_VERSION" "QGIS_CURRENT_STABLE" "QGIS_CURRENT_LTR")
+          for var in "${vars[@]}"; do
+            echo "${var}=${!var}"
+            echo "${var}=${!var}" >> "$GITHUB_OUTPUT"
+            echo "${var}=${!var}" >> "GITHUB_ENV"
 
       - name: Build PyQGIS docs
         if: ${{ github.event_name != 'pull_request' || matrix.qgis_version == 'master' }}
-        env:
-          RUNS_ON_CI: true
         run: |
-          echo "QGIS_VERSION: ${QGIS_VERSION}"
-          echo "BUILD_TESTING: ${BUILD_TESTING}"
-          ./scripts/run-docker.sh
+          ./scripts/run-docker.sh -v ${QGIS_VERSION} -l ${QGIS_VERSION_LIST}
 
       - uses: actions/upload-artifact@v4
         if: ${{ github.event_name != 'pull_request' || matrix.qgis_version == 'master' }}
@@ -103,6 +90,7 @@ jobs:
 
       - name: Deploy
         env:
-          VERSIONS: ${{ needs.build-docs.outputs.QGIS_VERSIONS_LIST }}
+          STABLE: ${{ needs.build-docs.outputs.QGIS_CURRENT_STABLE }}
+          LTR: ${{ needs.build-docs.outputs.QGIS_CURRENT_LTR }}
           GH_TOKEN: ${{ secrets.GH_TOKEN }}
-        run: ./scripts/publish-docs.sh ${VERSIONS}
+        run: ./scripts/publish-docs.sh "master,${STABLE},${LTR}"

@@ -18,14 +18,14 @@ while getopts "q:p:c:v:" opt; do
     ;;
   p)
     if [[ -z $PACKAGE ]]; then
-      PACKAGE="--package $OPTARG"
+      PACKAGE="-p $OPTARG"
     else
       PACKAGE="$PACKAGE $OPTARG"
     fi
     ;;
   c)
     if [[ -z $CLASS ]]; then
-      CLASS="--class $OPTARG"
+      CLASS="-c $OPTARG"
     else
       CLASS="$CLASS $OPTARG"
     fi
@@ -62,6 +62,7 @@ echo "##[endgroup]"
 
 echo "##[group] Docker run"
 docker rm -f pyqgis || true
+echo "command: /root/pyqgis/scripts/build-docs.sh ${PACKAGE} ${CLASS} -v ${QGIS_VERSION}"
 docker run --name pyqgis \
   qgis/qgis-python-api-doc:${QGIS_DOCKER_TAG} \
   /bin/bash -c "/root/pyqgis/scripts/build-docs.sh ${PACKAGE} ${CLASS} -v ${QGIS_VERSION}"

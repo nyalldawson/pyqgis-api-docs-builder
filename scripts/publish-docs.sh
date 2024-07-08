@@ -24,36 +24,18 @@ OUTPUT=${QGIS_VERSION}
 if [[ -n ${GITHUB_RUN_ID} ]]; then
   git config --global user.email "qgisninja@gmail.com"
   git config --global user.name "Geo-Ninja"
-  git clone https://${GH_TOKEN}@github.com/qgis/pyqgis.git --depth 100 --branch gh-pages
-  pushd pyqgis
-  # merge commit to lower repo size
-  git reset --hard HEAD~99
-  git merge --squash HEAD@{1}
-  git commit -m "Update docs"
+  git clone https://${GH_TOKEN}@github.com/qgis/pyqgis.git --depth 1 --branch gh-pages
 else
   git clone git@github.com:qgis/pyqgis.git --depth 1 --branch gh-pages
-  pushd pyqgis
 fi
+pushd pyqgis
 
-if [[ -n ${FIX_VERSION} ]]; then
-  echo "fixing versions...."
-  IFS=', ' read -r -a ALL_VERSIONS <<< $(${GP}sed -n 's/version_list: //p' ../../pyqgis_conf.yml)
-  HTML=""
-  for v in "${ALL_VERSIONS[@]}"; do
-    HTML="${HTML}\n      \n        <dd><a href=\"https://qgis.org/pyqgis/${v}\">${v}</a></dd>"
-  done
-  export LANGUAGE=en_US.UTF-8
-  export LANG=en_US.UTF-8
-  export LC_ALL=en_US.UTF-8
-  find . -type f -iname "*.html" -exec perl -i -p0e "s@<dl>(\s*)<dt>Versions</dt>.*</dl>@<dl>\1<dt>Versions</dt>${HTML}\n      \n    </dl>@smg" {} \;
-else
-  for VERSION in "${VERSIONS[@]}"; do
-    echo "get ${VERSION}"
-    rm -rf ${VERSION}
-    mkdir "${VERSION}"
-    cp -R ../../${VERSION}/html/* ${VERSION}/
-  done
-fi
+for VERSION in "${VERSIONS[@]}"; do
+  echo "get ${VERSION}"
+  rm -rf ${VERSION}
+  mkdir "${VERSION}"
+  cp -R ../../${VERSION}/html/* ${VERSION}/
+done
 
 echo "##[group] Git commit"
 echo "*** Add and push"

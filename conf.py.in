@@ -115,7 +115,10 @@ html_last_updated_fmt = '%H:%M %b %d, %Y'
 # typographically correct entities.
 # html_use_smartypants = True
 
-version_list = cfg['version_list'].replace(' ', '').split(',')
+current_stable = str(cfg['current_stable'])
+current_ltr = str(cfg['current_ltr'])
+version_list = ('master', current_stable, current_ltr)
+
 url = cfg['pyqgis_url']
 if not url.endswith('/'):
     url += '/'
@@ -128,7 +131,7 @@ context = {
     'version_downloads': False,
     'current_version': version,
     'version': version,
-    'versions': [[v, url+v] for v in version_list],
+    'versions': [[v, url+v] for v in ('master', cfg['current_stable'], cfg['current_ltr'])],
     'version_branch': ''.join(['release-', version]).replace('.',
                                                         '_') if version != 'master' else 'master',
     'display_lower_left': True,

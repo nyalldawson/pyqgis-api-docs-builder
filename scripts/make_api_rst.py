@@ -59,9 +59,14 @@ def ltr_tag(v):
     return ""
 
 
-version_list = cfg["version_list"].replace(" ", "").split(",")
-version_links = ", ".join(
-    [f"`{v}{ltr_tag(v)} <https://qgis.org/pyqgis/{v}>`_" for v in version_list if v != "master"]
+current_stable = cfg["current_stable"]
+current_ltr = cfg["current_ltr"]
+current_stable_minor = int(current_stable.split(".")[1]) + 2  # '3.38' => 40
+old_versions_links = ", ".join(
+    [
+        f"`{v} <https://github.com/qgis/pyqgis/releases/download/3.{v}/3.{v}.zip>`_"
+        for v in range(0, current_stable_minor)
+    ]
 )
 
 
@@ -86,12 +91,16 @@ advocacy and supporting other users on our mailing lists and forums. Financial c
 QGIS source code is available at https://github.com/qgis/QGIS.
 There is also a `C++ version of the API documentation <https://api.qgis.org/api>`_ available.
 
-Earlier versions of the API
+Versions of the API
 ---------------------------
+
+Documentation for master: https://qgis.org/pyqgis/master
+Documentation for current stable ${current_stable}: https://qgis.org/pyqgis/${current_stable}
+Documentation for current LTR ${current_ltr}: https://qgis.org/pyqgis/${current_ltr}
 
 See `Backwards Incompatible Changes <https://api.qgis.org/api/master/api_break.html>`_ for information about incompatible changes to API between releases.
 
-Earlier versions of the documentation are also available on the QGIS website: {version_links}.
+Earlier versions of the documentation are also available as downloads: ${old_versions_links}.
 
 Communication channels
 ----------------------

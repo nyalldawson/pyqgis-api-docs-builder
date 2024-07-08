@@ -59,8 +59,8 @@ cp -r _static api/${QGIS_VERSION}/_static
 echo "##[endgroup]"
 
 echo "##[group]Build HTML"
-make prepare QGISVERSION=${QGIS_VERSION}
-make html QGISVERSION=${QGIS_VERSION}
+make prepare QGIS_VERSION=${QGIS_VERSION}
+make html QGIS_VERSION=${QGIS_VERSION}
 echo "##[endgroup]"
 
 popd
