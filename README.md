@@ -41,10 +41,6 @@ For all core (but no gui, analysis, etc):
 
 Open the build/html/ contents in your web browser.
 
-## Publishing the docs
-
-Use the ``publish-docs.sh`` script, with having build the docs before publishing them.
-
 ## Credits
 
 - Tim Sutton 2017 - Initial prototype for this build system

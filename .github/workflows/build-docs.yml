@@ -65,20 +65,19 @@ jobs:
           tag_name: ${{ env.QGIS_VERSION }}
           files: ./build/${{ env.QGIS_VERSION }}
 
-  publish-docs:
+  deploy-docs:
     if: ${{ github.event_name != 'pull_request' }}
-    name: Publish HTML
+    name: Deploy to Github pages
     runs-on: ubuntu-latest
     needs: build-docs
 
     steps:
-      - uses: actions/checkout@v4
-
       - name: Get artifact for master
         uses: actions/download-artifact@v4
         with:
           name: master
           merge-multiple: true
+          path: _site
 
       - name: Get artifact for stable
         if: ${{ github.event_name != 'pull_request' }}
@@ -86,6 +85,7 @@ jobs:
         with:
           name: stable
           merge-multiple: true
+          path: _site
 
       - name: Get artifact for ltr
         if: ${{ github.event_name != 'pull_request' }}
@@ -93,10 +93,7 @@ jobs:
         with:
           name: ltr
           merge-multiple: true
+          path: _site
 
       - name: Deploy
-        env:
-          STABLE: ${{ needs.build-docs.outputs.QGIS_CURRENT_STABLE }}
-          LTR: ${{ needs.build-docs.outputs.QGIS_CURRENT_LTR }}
-          GH_TOKEN: ${{ secrets.GH_TOKEN }}
-        run: ./scripts/publish-docs.sh "master,${STABLE},${LTR}"
+        uses: actions/upload-pages-artifact@v3
