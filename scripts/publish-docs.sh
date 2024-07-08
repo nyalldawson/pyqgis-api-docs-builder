@@ -51,13 +51,13 @@ else
   if [[ ${BUILD_TESTING} -ne false ]]; then
      echo "create folder for PR with master only"
      mkdir "PR${BUILD_TESTING}"
-     cp -R ../master/* PR${BUILD_TESTING}/
+     cp -R ../../master/* PR${BUILD_TESTING}/
   else
     for VERSION in "${VERSIONS[@]}"; do
       echo "get ${VERSION}"
       rm -rf ${VERSION}
       mkdir "${VERSION}"
-      cp -R ../${VERSION}/* ${VERSION}/
+      cp -R ../../${VERSION}/* ${VERSION}/
     done
   fi
 fi
@@ -76,8 +76,6 @@ else
   if [[ $response =~ ^[Yy](es)?$ ]]; then
       git push
   fi
-  rm -rf publish/*
 fi
-
 popd
 popd
