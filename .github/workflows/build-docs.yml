@@ -58,6 +58,13 @@ jobs:
           name: ${{ matrix.qgis_version }}
           path: ./build/
 
+      - name: Release
+        uses: softprops/action-gh-release@v2
+        if: ${{ github.event_name != 'pull_request' && matrix.qgis_version != 'master' }}
+        with:
+          tag_name: ${{ env.QGIS_VERSION }}
+          files: ./build/${{ env.QGIS_VERSION }}
+
   publish-docs:
     if: ${{ github.event_name != 'pull_request' }}
     name: Publish HTML
