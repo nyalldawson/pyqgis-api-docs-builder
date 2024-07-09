@@ -8,7 +8,6 @@ on:
   schedule:
     # runs once a week
     - cron: '0 0 * * 0'
-
   push:
     branches:
       - master
@@ -75,7 +74,6 @@ jobs:
         with:
           name: master
           merge-multiple: true
-          path: _site
 
       - name: Get artifact for stable
         if: ${{ github.event_name != 'pull_request' }}
@@ -83,7 +81,6 @@ jobs:
         with:
           name: stable
           merge-multiple: true
-          path: _site
 
       - name: Get artifact for ltr
         if: ${{ github.event_name != 'pull_request' }}
@@ -91,7 +88,11 @@ jobs:
         with:
           name: ltr
           merge-multiple: true
-          path: _site
 
       - name: Deploy
         uses: actions/upload-pages-artifact@v3
+        with:
+          path: .
+
+      - name: Deploy to GitHub Pages
+        uses: actions/deploy-pages@v4
