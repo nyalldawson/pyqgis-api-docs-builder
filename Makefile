@@ -27,9 +27,9 @@
 SPHINXOPTS    = -j auto
 SPHINXBUILD   = sphinx-build
 SPHINXPROJ    = QGIS
-QGISVERSION   = master
-BUILDDIR      = build/${QGISVERSION}
-SOURCEDIR     = api/${QGISVERSION}
+QGIS_VERSION   = master
+BUILDDIR      = build/${QGIS_VERSION}
+SOURCEDIR     = api/${QGIS_VERSION}
 
 # Following variables should be sent when making
 # QGISVERSION might be override by doing make prepare QGISVERSION=3.2
@@ -49,7 +49,7 @@ help:
 .PHONY: help Makefile
 
 prepare:
-	${SED} -r 's/__QGIS_VERSION__/${QGIS_VERSION}/g; s/__PYQGISURL__/${PYQGISURL}/' conf.py.in > $(SOURCEDIR)/conf.py
+	${SED} -r 's/__QGIS_VERSION__/${QGIS_VERSION}/g; conf.py.in > $(SOURCEDIR)/conf.py
 
 # Catch-all target: route all unknown targets to Sphinx using the new
 # "make mode" option.  $(O) is meant as a shortcut for $(SPHINXOPTS).
