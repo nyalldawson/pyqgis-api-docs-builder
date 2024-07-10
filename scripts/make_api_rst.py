@@ -64,8 +64,8 @@ current_ltr = cfg["current_ltr"]
 current_stable_minor = int(current_stable.split(".")[1]) + 2  # '3.38' => 40
 old_versions_links = ", ".join(
     [
-        f"`{v} <https://github.com/qgis/pyqgis/releases/download/3.{v}/3.{v}.zip>`_"
-        for v in range(0, current_stable_minor)
+        f"`3.0{v} <https://github.com/qgis/pyqgis/releases/download/3.{v}/3.{v}.zip>`_"
+        for v in range(0, current_stable_minor, 2)
     ]
 )
 
@@ -94,13 +94,13 @@ There is also a `C++ version of the API documentation <https://api.qgis.org/api>
 Versions of the API
 ---------------------------
 
-Documentation for master: https://qgis.org/pyqgis/master
-Documentation for current stable ${current_stable}: https://qgis.org/pyqgis/${current_stable}
-Documentation for current LTR ${current_ltr}: https://qgis.org/pyqgis/${current_ltr}
+* Documentation for master: https://qgis.org/pyqgis/master
+* Documentation for current stable {current_stable}: https://qgis.org/pyqgis/{current_stable}
+* Documentation for current LTR {current_ltr}: https://qgis.org/pyqgis/{current_ltr}
 
 See `Backwards Incompatible Changes <https://api.qgis.org/api/master/api_break.html>`_ for information about incompatible changes to API between releases.
 
-Earlier versions of the documentation are also available as downloads: ${old_versions_links}.
+Earlier versions of the documentation are also available as downloads: {old_versions_links}.
 
 Communication channels
 ----------------------

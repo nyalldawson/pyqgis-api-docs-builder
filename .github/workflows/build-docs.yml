@@ -63,12 +63,16 @@ jobs:
           name: ${{ matrix.qgis_version }}
           path: ./build/
 
+      - name: Create archive
+
+        run: zip -r pyqgis-docs-${{ env.QGIS_VERSION }}.zip ./build/${{ env.QGIS_VERSION }}
+
       - name: Release
         uses: softprops/action-gh-release@v2
         if: ${{ github.event_name != 'pull_request' && matrix.qgis_version != 'master' }}
         with:
           tag_name: ${{ env.QGIS_VERSION }}
-          files: ./build/${{ env.QGIS_VERSION }}
+          files: pyqgis-docs-${{ env.QGIS_VERSION }}.zip
 
   deploy-docs:
     if: ${{ github.event_name != 'pull_request' }}
