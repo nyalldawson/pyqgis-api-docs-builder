@@ -64,7 +64,7 @@ current_ltr = cfg["current_ltr"]
 current_stable_minor = int(current_stable.split(".")[1]) + 2  # '3.38' => 40
 old_versions_links = ", ".join(
     [
-        f"`3.0{v} <https://github.com/qgis/pyqgis/releases/download/3.{v}/3.{v}.zip>`_"
+        f"`3.{v} <https://github.com/qgis/pyqgis/releases/download/3.{v}/3.{v}.zip>`_"
         for v in range(0, current_stable_minor, 2)
     ]
 )
