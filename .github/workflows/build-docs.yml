@@ -61,18 +61,18 @@ jobs:
         if: ${{ github.event_name != 'pull_request' || matrix.qgis_version == 'master' }}
         with:
           name: ${{ matrix.qgis_version }}
-          path: ./build/
+          path: ./build/${{ matrix.qgis_version }}/html
 
       - name: Create archive
         if: ${{ github.event_name != 'pull_request' || matrix.qgis_version == 'master' }}
-        run: zip -r pyqgis-docs-${{ env.QGIS_VERSION }}.zip ./build/${{ env.QGIS_VERSION }}
+        run: zip -r pyqgis-docs-${{ matrix.qgis_version }}.zip ./build/${{ matrix.qgis_version }}/html
 
       - name: Release
         uses: softprops/action-gh-release@v2
         if: ${{ github.event_name != 'pull_request' && matrix.qgis_version != 'master' }}
         with:
-          tag_name: ${{ env.QGIS_VERSION }}
-          files: pyqgis-docs-${{ env.QGIS_VERSION }}.zip
+          tag_name: ${{ matrix.qgis_version }}
+          files: pyqgis-docs-${{ matrix.qgis_version }}.zip
 
   deploy-docs:
     if: ${{ github.event_name != 'pull_request' }}
