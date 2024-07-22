@@ -45,7 +45,7 @@ else
 
   echo $(apt list --installed qgis)
 
-  VERSION_INSTALLED=$(apt list --installed qgis | grep installed | cut -d' ' -f2 | cut -d\+ -f1)
+  VERSION_INSTALLED=$(apt list --installed qgis | grep installed | cut -d: -f2 | cut -d\+ -f1)
   if [[ ${VERSION_INSTALLED} =~ ^${QGIS_VERSION}\.[0-9]+$ ]]; then
     echo "version check ok: ${VERSION_INSTALLED}"
   else
