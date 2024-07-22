@@ -61,7 +61,8 @@ jobs:
         if: ${{ github.event_name != 'pull_request' || matrix.qgis_version == 'master' }}
         with:
           name: ${{ matrix.qgis_version }}
-          path: ./build/${{ matrix.qgis_version }}/html
+          path: ./build/${{ env.QGIS_VERSION }}/html
+          if-no-files-found: error
 
       - name: Create archive
         if: ${{ github.event_name != 'pull_request' || matrix.qgis_version == 'master' }}
