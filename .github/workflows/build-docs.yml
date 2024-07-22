@@ -64,7 +64,7 @@ jobs:
           path: ./build/
 
       - name: Create archive
-
+        if: ${{ github.event_name != 'pull_request' || matrix.qgis_version == 'master' }}
         run: zip -r pyqgis-docs-${{ env.QGIS_VERSION }}.zip ./build/${{ env.QGIS_VERSION }}
 
       - name: Release
