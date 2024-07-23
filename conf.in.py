@@ -44,7 +44,7 @@ version = "__QGIS_VERSION__"
 release = "__QGIS_VERSION__"
 
 if version == "master":
-    QGIS_GIT_TAG = ""
+    QGIS_GIT_TAG = "master"
 else:
     QGIS_GIT_TAG = f"release-{release.replace('.','_')}"
 
