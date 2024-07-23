@@ -4,6 +4,11 @@ set -e
 
 DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 
+GP=
+if [[ "$OSTYPE" == *bsd* ]] || [[ "$OSTYPE" =~ darwin* ]]; then
+  GP=g
+fi
+
 pushd ${DIR}/..
 
 QGIS_VERSION=master
@@ -85,8 +90,14 @@ cp -r _static api/${QGIS_VERSION}/_static
 echo "##[endgroup]"
 
 echo "##[group]Build HTML"
-make prepare QGIS_VERSION=${QGIS_VERSION}
-make html QGIS_VERSION=${QGIS_VERSION}
+${GP}sed -r "s/__QGIS_VERSION__/${QGIS_VERSION}/g;" conf.in.py > api/${QGIS_VERSION}/conf.py
+sphinx-build -M html api/${QGIS_VERSION} build/${QGIS_VERSION} -T -j auto
+echo "##[endgroup]"
+
+echo "##[group]Move files around"
+rm -rf build/${QGIS_VERSION}/doctrees
+mv build/${QGIS_VERSION}/html/* build/${QGIS_VERSION}
+rm -rf build/${QGIS_VERSION}/html
 echo "##[endgroup]"
 
 popd
