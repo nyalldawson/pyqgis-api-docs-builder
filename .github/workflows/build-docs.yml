@@ -56,17 +56,18 @@ jobs:
         if: ${{ github.event_name != 'pull_request' || matrix.qgis_version == 'master' }}
         run: |
           ./scripts/run-docker.sh -v ${QGIS_VERSION}
+          mv ./build/${{ env.QGIS_VERSION }}/html ./build/${{ env.QGIS_VERSION }}/${{ env.QGIS_VERSION }}
 
       - uses: actions/upload-artifact@v4
         if: ${{ github.event_name != 'pull_request' || matrix.qgis_version == 'master' }}
         with:
           name: ${{ matrix.qgis_version }}
-          path: ./build/${{ env.QGIS_VERSION }}/html
+          path: ./build/${{ env.QGIS_VERSION }}
           if-no-files-found: error
 
       - name: Create archive
         if: ${{ github.event_name != 'pull_request' || matrix.qgis_version == 'master' }}
-        run: zip -r pyqgis-docs-${{ env.QGIS_VERSION }}.zip ./build/${{ env.QGIS_VERSION }}/html
+        run: zip -r pyqgis-docs-${{ env.QGIS_VERSION }}.zip ./build/${{ env.QGIS_VERSION }}
 
       - name: Release
         uses: softprops/action-gh-release@v2
