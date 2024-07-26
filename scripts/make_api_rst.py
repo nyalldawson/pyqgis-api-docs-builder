@@ -62,7 +62,7 @@ def ltr_tag(v):
 current_stable = cfg["current_stable"]
 current_ltr = cfg["current_ltr"]
 current_stable_minor = int(current_stable.split(".")[1]) + 2  # '3.38' => 40
-current_ltr_minor = int(current_stable.split(".")[1]) + 2  # '3.38' => 40
+current_ltr_minor = int(current_ltr.split(".")[1]) + 2  # '3.38' => 40
 old_versions_links = ", ".join(reversed(
     [
         f"`3.{v} <https://github.com/qgis/pyqgis-api-docs-builder/releases/download/3.{v}/pyqgis-docs-3.{v}.zip>`_"
