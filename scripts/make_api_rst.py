@@ -62,14 +62,14 @@ def ltr_tag(v):
 
 current_stable = cfg["current_stable"]
 current_ltr = cfg["current_ltr"]
-current_stable_minor = int(current_stable.split(".")[1]) + 2  # '3.38' => 40
-current_ltr_minor = int(current_ltr.split(".")[1]) + 2  # '3.38' => 40
+current_stable_minor = int(current_stable.split(".")[1])
+current_ltr_minor = int(current_ltr.split(".")[1])
 old_versions_links = ", ".join(
     reversed(
         [
             f"`3.{v} <https://github.com/qgis/pyqgis-api-docs-builder/releases/download/3.{v}/pyqgis-docs-3.{v}.zip>`_"
             for v in range(0, current_stable_minor, 2)
-            if v not in (current_stable_minor, current_ltr_minor)
+            if v != current_ltr_minor
         ]
     )
 )
@@ -77,7 +77,6 @@ old_versions_links = ", ".join(
 py_ext_sig_re = re.compile(
     r"""^(?:([\w.]+::)?([\w.]+\.)?(\w+)\s*(?:\((.*)\)(?:\s*->\s*([\w.]+(?:\[.*?\])?))?(?:\s*\[(signal)\])?)?)?$"""
 )
-
 
 # Make sure :numbered: is only specified in the top level index - see
 # sphinx docs about this.
