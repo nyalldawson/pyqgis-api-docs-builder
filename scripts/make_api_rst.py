@@ -2,6 +2,7 @@
 
 import argparse
 import re
+from collections import defaultdict
 from os import makedirs
 from shutil import rmtree
 from string import Template
@@ -142,10 +143,55 @@ PACKAGENAME
 ===================================
 
 .. toctree::
-   :maxdepth: 4
+   :maxdepth: 1
+   :hidden:
    :caption: PACKAGENAME:
 
 """
+
+MODULE_TOC_MAX_COLUMN_SIZES = [300, 500]
+
+
+def extract_summary(doc: str) -> str:
+    """
+    Extract summary from docstring.
+    """
+    doc = [line for line in doc.split("\n") if not line or not py_ext_sig_re.match(line)]
+
+    # Skip a blank lines at the top
+    while doc and not doc[0].strip():
+        doc.pop(0)
+
+    # If there's a blank line, then we can assume the first sentence /
+    # paragraph has ended, so anything after shouldn't be part of the
+    # summary
+    for i, piece in enumerate(doc):
+        if not piece.strip():
+            doc = doc[:i]
+            break
+
+    if not doc:
+        return ""
+
+    return " ".join(doc)
+
+
+def make_table_row(contents: list[str]):
+    """
+    Adds a row to the module TOC table
+    """
+    res = "|"
+    for column, cell in enumerate(contents):
+        formatted_cell = cell[: MODULE_TOC_MAX_COLUMN_SIZES[column]]
+        formatted_cell = formatted_cell + " " * (
+            MODULE_TOC_MAX_COLUMN_SIZES[column] - len(formatted_cell)
+        )
+        res += formatted_cell + "|"
+    res += "\n"
+    for column, _ in enumerate(contents):
+        res += f"+{'-' * MODULE_TOC_MAX_COLUMN_SIZES[column]}"
+    res += "+\n"
+    return res
 
 
 def generate_docs():
@@ -187,6 +233,7 @@ def generate_docs():
         package_index = open(f"api/{qgis_version}/{package_name}/index.rst", "w")
         # Read in the standard rst template we will use for classes
         package_index.write(package_header.replace("PACKAGENAME", package_name))
+        package_custom_toc = defaultdict(str)
 
         for class_name, _class in extract_package_classes(package):
             exclude_methods = set()
@@ -226,6 +273,43 @@ def generate_docs():
             print(class_template, file=class_rst)
             class_rst.close()
             package_index.write(f"   {class_name}\n")
+            class_doc = _class.__doc__
+            summary = ""
+            if class_doc:
+                summary = extract_summary(class_doc)
+            row_contents = [f"`{class_name} <{class_name}.html>`_", summary or ""]
+            group = ".".join(_class.__group__) if hasattr(_class, "__group__") else ""
+            package_custom_toc[group] += make_table_row(row_contents)
+
+        sorted_package_groups = sorted(
+            package_custom_toc.keys(), key=lambda x: cfg["group-names"].get(x, x)
+        )
+        if len(sorted_package_groups) > 1:
+            # Add TOC for groups
+            package_index.write("\n")
+            for package_group in sorted_package_groups:
+                if not package_group:
+                    continue
+
+                anchor = f'{package_name.replace("_", "")}.{package_group}'.replace(".", "_")
+                group_name = cfg["group-names"].get(package_group, package_group)
+                package_index.write(f"- :ref:`{group_name}<{anchor}>`\n")
+
+            package_index.write("\n")
+
+        for package_group in sorted_package_groups:
+            group_custom_toc = package_custom_toc[package_group]
+            if package_group:
+                anchor = f'{package_name.replace("_", "")}.{package_group}'.replace(".", "_")
+                package_index.write(f".. _{anchor}:\n\n")
+                group_name = cfg["group-names"].get(package_group, package_group)
+                package_index.write(f"{group_name}\n{'-' * len(group_name)}\n")
+            package_index.write(
+                f"\n+{'-' * MODULE_TOC_MAX_COLUMN_SIZES[0]}+{'-' * MODULE_TOC_MAX_COLUMN_SIZES[1]}+\n"
+            )
+            package_index.write(group_custom_toc)
+            package_index.write("\n")
+
         package_index.close()
 
     index.write(document_footer)
