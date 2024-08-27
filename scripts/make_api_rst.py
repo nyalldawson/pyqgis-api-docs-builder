@@ -342,12 +342,12 @@ def generate_docs():
 
                 base_header = export_bases(_class)
                 if base_header:
-                    bases_and_subclass_header += "\n" + write_header("Base classes")
+                    bases_and_subclass_header += "\n" + write_header("Base classes", 2)
                     bases_and_subclass_header += f"\n+{'-' * MODULE_TOC_MAX_COLUMN_SIZES[0]}+{'-' * MODULE_TOC_MAX_COLUMN_SIZES[1]}+\n"
                     bases_and_subclass_header += base_header
 
             if hasattr(_class, "__subclasses__") and _class.__subclasses__():
-                bases_and_subclass_header += "\n" + write_header("Subclasses")
+                bases_and_subclass_header += "\n" + write_header("Subclasses", 2)
                 bases_and_subclass_header += f"\n+{'-' * MODULE_TOC_MAX_COLUMN_SIZES[0]}+{'-' * MODULE_TOC_MAX_COLUMN_SIZES[1]}+\n"
 
                 for subclass in _class.__subclasses__():
@@ -377,6 +377,7 @@ def generate_docs():
                 if bases_and_subclass_header:
                     if header:
                         header += "\n"
+                    header += write_header("Class Hierarchy")
                     header += inheritance_diagram
                     header += bases_and_subclass_header
                 toc = class_toc
