@@ -71,6 +71,20 @@ def process_docstring(app, what, name, obj, options, lines):
                     break
 
             lines[:] = lines[init_idx:]
+            lines_out = []
+            # loop through remaining lines, which are the constructors. Format
+            # these up so they look like proper __init__ method documentation
+            for i, line in enumerate(lines):
+                if re.match(rf"^{class_name}\(", line):
+                    lines_out.append(
+                        re.sub(rf"\b{class_name}\(", ".. py:method:: __init__(", line)
+                    )
+                    lines_out.append("")
+                else:
+                    lines_out.append("    " + line)
+
+            lines[:] = lines_out[:]
+            return
 
     for i in range(len(lines)):
 
