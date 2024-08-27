@@ -178,7 +178,7 @@ PACKAGENAME
 
 """
 
-class_header = """
+inheritance_diagram = """
 .. inheritance-diagram:: qgis.$PACKAGE.$CLASS
    :parts: 1
 """
@@ -318,10 +318,7 @@ def generate_docs():
             header = ""
             toc = ""
 
-            if inspect.isclass(_class):
-                header = class_header
-                toc = class_toc
-
+            bases_and_subclass_header = ""
             if hasattr(_class, "__bases__") and _class.__bases__:
 
                 def export_bases(_b):
@@ -342,21 +339,27 @@ def generate_docs():
 
                 base_header = export_bases(_class)
                 if base_header:
-                    header += "\n" + write_header("Base classes")
-                    header += f"\n+{'-' * MODULE_TOC_MAX_COLUMN_SIZES[0]}+{'-' * MODULE_TOC_MAX_COLUMN_SIZES[1]}+\n"
-                    header += base_header
+                    bases_and_subclass_header += "\n" + write_header("Base classes")
+                    bases_and_subclass_header += f"\n+{'-' * MODULE_TOC_MAX_COLUMN_SIZES[0]}+{'-' * MODULE_TOC_MAX_COLUMN_SIZES[1]}+\n"
+                    bases_and_subclass_header += base_header
 
             if hasattr(_class, "__subclasses__") and _class.__subclasses__():
-                header += "\n" + write_header("Subclasses")
-                header += f"\n+{'-' * MODULE_TOC_MAX_COLUMN_SIZES[0]}+{'-' * MODULE_TOC_MAX_COLUMN_SIZES[1]}+\n"
+                bases_and_subclass_header += "\n" + write_header("Subclasses")
+                bases_and_subclass_header += f"\n+{'-' * MODULE_TOC_MAX_COLUMN_SIZES[0]}+{'-' * MODULE_TOC_MAX_COLUMN_SIZES[1]}+\n"
 
                 for subclass in _class.__subclasses__():
-                    header += make_table_row(
+                    bases_and_subclass_header += make_table_row(
                         [
                             f"`{subclass.__name__} <{subclass.__name__}.html>`_",
                             extract_summary(subclass.__doc__),
                         ]
                     )
+
+            if inspect.isclass(_class):
+                if bases_and_subclass_header:
+                    header += inheritance_diagram
+                    header += bases_and_subclass_header
+                toc = class_toc
 
             for method in dir(_class):
                 if not hasattr(_class, method):
