@@ -100,7 +100,10 @@ class RecursiveTemplate(Template):
             raise ValueError("Max recursion depth exceeded")
 
         self.depth += 1
-        result = super().safe_substitute(**kws)
+        try:
+            result = super().safe_substitute(**kws)
+        except RecursionError:
+            return self.template
 
         if "$" in result:
             return self.__class__(result)._recursive_substitute(**kws)
