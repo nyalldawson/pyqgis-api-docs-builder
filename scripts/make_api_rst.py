@@ -356,6 +356,21 @@ def generate_docs():
                     )
 
             if inspect.isclass(_class):
+                class_doc = _class.__doc__
+                # only keep the actual class doc string part. SIP will
+                # append the constructor signatures and docs at the end
+                # of the class doc, so let's trim those off.
+                # They'll get included later in the actual listing of
+                # class methods
+                lines = class_doc.split("\n")
+                init_idx = 0
+                for init_idx, line in enumerate(lines):
+                    if re.match(rf"^{_class.__name__}\(", line):
+                        break
+
+                doc = "\n".join(lines[:init_idx])
+                _class.__doc__ = doc
+                header = _class.__doc__
                 if bases_and_subclass_header:
                     header += inheritance_diagram
                     header += bases_and_subclass_header
