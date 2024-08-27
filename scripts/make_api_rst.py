@@ -100,7 +100,10 @@ class RecursiveTemplate(Template):
             raise ValueError("Max recursion depth exceeded")
 
         self.depth += 1
-        result = super().safe_substitute(**kws)
+        try:
+            result = super().safe_substitute(**kws)
+        except RecursionError:
+            return self.template
 
         if "$" in result:
             return self.__class__(result)._recursive_substitute(**kws)
@@ -178,35 +181,35 @@ PACKAGENAME
 
 """
 
-class_header = """
+inheritance_diagram = """
 .. inheritance-diagram:: qgis.$PACKAGE.$CLASS
    :parts: 1
 """
 
 class_toc = """
-    .. autoautosummary:: qgis.$PACKAGE.$CLASS
-        :enums:
-        :nosignatures:
-        :exclude-members: $EXCLUDE_METHODS
+.. autoautosummary:: qgis.$PACKAGE.$CLASS
+    :enums:
+    :nosignatures:
+    :exclude-members: $EXCLUDE_METHODS
 
-    .. autoautosummary:: qgis.$PACKAGE.$CLASS
-        :methods:
-        :nosignatures:
-        :exclude-members: $EXCLUDE_METHODS
+.. autoautosummary:: qgis.$PACKAGE.$CLASS
+    :methods:
+    :nosignatures:
+    :exclude-members: $EXCLUDE_METHODS
 
-    .. autoautosummary:: qgis.$PACKAGE.$CLASS
-        :static_methods:
-        :nosignatures:
-        :exclude-members: $EXCLUDE_METHODS
+.. autoautosummary:: qgis.$PACKAGE.$CLASS
+    :static_methods:
+    :nosignatures:
+    :exclude-members: $EXCLUDE_METHODS
 
-    .. autoautosummary:: qgis.$PACKAGE.$CLASS
-        :signals:
-        :nosignatures:
-        :exclude-members: $EXCLUDE_METHODS
+.. autoautosummary:: qgis.$PACKAGE.$CLASS
+    :signals:
+    :nosignatures:
+    :exclude-members: $EXCLUDE_METHODS
 
-    .. autoautosummary:: qgis.$PACKAGE.$CLASS
-        :attributes:
-        :exclude-members: $EXCLUDE_METHODS
+.. autoautosummary:: qgis.$PACKAGE.$CLASS
+    :attributes:
+    :exclude-members: $EXCLUDE_METHODS
 """
 
 MODULE_TOC_MAX_COLUMN_SIZES = [300, 500]
@@ -318,10 +321,7 @@ def generate_docs():
             header = ""
             toc = ""
 
-            if inspect.isclass(_class):
-                header = class_header
-                toc = class_toc
-
+            bases_and_subclass_header = ""
             if hasattr(_class, "__bases__") and _class.__bases__:
 
                 def export_bases(_b):
@@ -342,21 +342,45 @@ def generate_docs():
 
                 base_header = export_bases(_class)
                 if base_header:
-                    header += "\n" + write_header("Base classes")
-                    header += f"\n+{'-' * MODULE_TOC_MAX_COLUMN_SIZES[0]}+{'-' * MODULE_TOC_MAX_COLUMN_SIZES[1]}+\n"
-                    header += base_header
+                    bases_and_subclass_header += "\n" + write_header("Base classes", 2)
+                    bases_and_subclass_header += f"\n+{'-' * MODULE_TOC_MAX_COLUMN_SIZES[0]}+{'-' * MODULE_TOC_MAX_COLUMN_SIZES[1]}+\n"
+                    bases_and_subclass_header += base_header
 
             if hasattr(_class, "__subclasses__") and _class.__subclasses__():
-                header += "\n" + write_header("Subclasses")
-                header += f"\n+{'-' * MODULE_TOC_MAX_COLUMN_SIZES[0]}+{'-' * MODULE_TOC_MAX_COLUMN_SIZES[1]}+\n"
+                bases_and_subclass_header += "\n" + write_header("Subclasses", 2)
+                bases_and_subclass_header += f"\n+{'-' * MODULE_TOC_MAX_COLUMN_SIZES[0]}+{'-' * MODULE_TOC_MAX_COLUMN_SIZES[1]}+\n"
 
                 for subclass in _class.__subclasses__():
-                    header += make_table_row(
+                    bases_and_subclass_header += make_table_row(
                         [
                             f"`{subclass.__name__} <{subclass.__name__}.html>`_",
                             extract_summary(subclass.__doc__),
                         ]
                     )
+
+            if inspect.isclass(_class):
+                class_doc = _class.__doc__
+                # only keep the actual class doc string part. SIP will
+                # append the constructor signatures and docs at the end
+                # of the class doc, so let's trim those off.
+                # They'll get included later in the actual listing of
+                # class methods
+                if class_doc:
+                    lines = class_doc.split("\n")
+                    init_idx = 0
+                    for init_idx, line in enumerate(lines):
+                        if re.match(rf"^{_class.__name__}\(", line):
+                            break
+
+                    header = "\n".join(lines[:init_idx])
+
+                if bases_and_subclass_header:
+                    if header:
+                        header += "\n\n"
+                    header += write_header("Class Hierarchy")
+                    header += inheritance_diagram
+                    header += bases_and_subclass_header
+                toc = class_toc
 
             for method in dir(_class):
                 if not hasattr(_class, method):

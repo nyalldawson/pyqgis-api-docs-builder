@@ -1,3 +1,8 @@
+.graphviz {
+   margin-top: 10px;
+   margin-bottom: 10px;
+}
+
 /* adds scrollbar to sidenav */
 .wy-side-scroll {
    width: auto;

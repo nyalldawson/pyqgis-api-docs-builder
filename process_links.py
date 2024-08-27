@@ -58,7 +58,35 @@ def create_links(doc: str) -> str:
 
 
 def process_docstring(app, what, name, obj, options, lines):
-    # print('d', what, name, obj, options)
+    if what == "class":
+        # hacky approach to detect nested classes, eg QgsCallout.QgsCalloutContext
+        is_nested = len(name.split(".")) > 3
+        if not is_nested:
+            # remove docstring part, we've already included it in the page header
+            # only leave the __init__ methods
+            init_idx = 0
+            class_name = name.split(".")[-1]
+            for init_idx, line in enumerate(lines):
+                if re.match(rf"^{class_name}\(", line):
+                    break
+
+            lines[:] = lines[init_idx:]
+            lines_out = []
+            # loop through remaining lines, which are the constructors. Format
+            # these up so they look like proper __init__ method documentation
+            for i, line in enumerate(lines):
+                if re.match(rf"^{class_name}\(", line):
+                    lines_out.append(
+                        re.sub(rf"\b{class_name}\(", ".. py:method:: __init__(", line)
+                    )
+                    lines_out.append("    :noindex:")
+                    lines_out.append("")
+                else:
+                    lines_out.append("    " + line)
+
+            lines[:] = lines_out[:]
+            return
+
     for i in range(len(lines)):
 
         # fix seealso
