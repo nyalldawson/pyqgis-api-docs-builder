@@ -362,16 +362,18 @@ def generate_docs():
                 # of the class doc, so let's trim those off.
                 # They'll get included later in the actual listing of
                 # class methods
-                lines = class_doc.split("\n")
-                init_idx = 0
-                for init_idx, line in enumerate(lines):
-                    if re.match(rf"^{_class.__name__}\(", line):
-                        break
+                if class_doc:
+                    lines = class_doc.split("\n")
+                    init_idx = 0
+                    for init_idx, line in enumerate(lines):
+                        if re.match(rf"^{_class.__name__}\(", line):
+                            break
 
-                doc = "\n".join(lines[:init_idx])
-                _class.__doc__ = doc
-                header = _class.__doc__
+                    header = "\n".join(lines[:init_idx])
+
                 if bases_and_subclass_header:
+                    if header:
+                        header += "\n"
                     header += inheritance_diagram
                     header += bases_and_subclass_header
                 toc = class_toc
