@@ -184,29 +184,29 @@ inheritance_diagram = """
 """
 
 class_toc = """
-    .. autoautosummary:: qgis.$PACKAGE.$CLASS
-        :enums:
-        :nosignatures:
-        :exclude-members: $EXCLUDE_METHODS
+.. autoautosummary:: qgis.$PACKAGE.$CLASS
+    :enums:
+    :nosignatures:
+    :exclude-members: $EXCLUDE_METHODS
 
-    .. autoautosummary:: qgis.$PACKAGE.$CLASS
-        :methods:
-        :nosignatures:
-        :exclude-members: $EXCLUDE_METHODS
+.. autoautosummary:: qgis.$PACKAGE.$CLASS
+    :methods:
+    :nosignatures:
+    :exclude-members: $EXCLUDE_METHODS
 
-    .. autoautosummary:: qgis.$PACKAGE.$CLASS
-        :static_methods:
-        :nosignatures:
-        :exclude-members: $EXCLUDE_METHODS
+.. autoautosummary:: qgis.$PACKAGE.$CLASS
+    :static_methods:
+    :nosignatures:
+    :exclude-members: $EXCLUDE_METHODS
 
-    .. autoautosummary:: qgis.$PACKAGE.$CLASS
-        :signals:
-        :nosignatures:
-        :exclude-members: $EXCLUDE_METHODS
+.. autoautosummary:: qgis.$PACKAGE.$CLASS
+    :signals:
+    :nosignatures:
+    :exclude-members: $EXCLUDE_METHODS
 
-    .. autoautosummary:: qgis.$PACKAGE.$CLASS
-        :attributes:
-        :exclude-members: $EXCLUDE_METHODS
+.. autoautosummary:: qgis.$PACKAGE.$CLASS
+    :attributes:
+    :exclude-members: $EXCLUDE_METHODS
 """
 
 MODULE_TOC_MAX_COLUMN_SIZES = [300, 500]
