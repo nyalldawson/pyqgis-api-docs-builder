@@ -10,7 +10,7 @@ import PyQt5
 from docutils import nodes
 from docutils.parsers.rst import directives
 from sphinx.ext import autosummary
-from sphinx.ext.autosummary import Autosummary, get_documenter
+from sphinx.ext.autosummary import Autosummary, ImportExceptionGroup, get_documenter
 from sphinx.locale import __
 from sphinx.util import logging
 from sphinx.util.inspect import isstaticmethod, safe_getattr
@@ -139,6 +139,28 @@ class AutoAutoSummary(Autosummary):
         except BaseException as e:
             print(str(e))
             raise e
+
+    def import_by_name(
+        self,
+        name: str,
+        prefixes: list[str | None],
+    ) -> tuple[str, Any, Any, str]:
+        """
+        We have to wrap the original import_by_name, which raises noisy
+        exceptions when trying to handle class attributes exposed by SIP.
+        """
+        try:
+            res = super().import_by_name(name, prefixes)
+        except ImportExceptionGroup:
+            # class attribute import failed, just handle this by faking
+            # the results. The resultant documentation still correctly
+            # contains the attribute docstrings...
+            name_parts = name.split(".")
+            parent_name = ".".join(name_parts[:-1])
+            parent_res = super().import_by_name(parent_name, prefixes)
+            res = (name, None, parent_res[2], parent_res[3])
+
+        return res
 
     def run(self):
         clazz = self.arguments[0]
