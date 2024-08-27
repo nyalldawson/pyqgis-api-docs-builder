@@ -79,6 +79,7 @@ def process_docstring(app, what, name, obj, options, lines):
                     lines_out.append(
                         re.sub(rf"\b{class_name}\(", ".. py:method:: __init__(", line)
                     )
+                    lines_out.append("    :noindex:")
                     lines_out.append("")
                 else:
                     lines_out.append("    " + line)
