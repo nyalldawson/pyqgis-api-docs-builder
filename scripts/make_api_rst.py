@@ -376,7 +376,7 @@ def generate_docs():
 
                 if bases_and_subclass_header:
                     if header:
-                        header += "\n"
+                        header += "\n\n"
                     header += write_header("Class Hierarchy")
                     header += inheritance_diagram
                     header += bases_and_subclass_header
