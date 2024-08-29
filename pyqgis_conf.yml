@@ -8,7 +8,36 @@ current_ltr: '3.34'
 skipped:
   - PyProviderMetadata
   - Enum
-
+  - SymbolTable
+  - SymbolId
+  - SymbolName
+  - SymbolXML
+  - SymbolFavoriteId
+  - TagTable
+  - TagId
+  - TagName
+  - TagmapTable
+  - TagmapTagId
+  - TagmapSymbolId
+  - ColorrampTable
+  - ColorrampId
+  - ColorrampName
+  - ColorrampXML
+  - ColorrampFavoriteId
+  - TextFormatTable
+  - TextFormatId
+  - TextFormatName
+  - TextFormatXML
+  - TextFormatFavoriteId
+  - LabelSettingsTable
+  - LabelSettingsId
+  - LabelSettingsName
+  - LabelSettingsXML
+  - LabelSettingsFavoriteId
+  - SmartgroupTable
+  - SmartgroupId
+  - SmartgroupName
+  - SmartgroupXML
 
 non-instantiable:
   - qgis.core.QgsRunProcess
