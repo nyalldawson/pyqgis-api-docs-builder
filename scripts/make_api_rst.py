@@ -1,12 +1,18 @@
 #!/usr/bin/env python3
 
+from pathlib import Path
 import argparse
 import inspect
 import re
+import importlib
 from collections import defaultdict
 from os import makedirs
 from shutil import rmtree
 from string import Template
+
+from qgis.core import QgsApplication
+qgs = QgsApplication([], False)
+qgs.initQgis()
 
 import yaml
 
@@ -274,6 +280,22 @@ def make_table_row(contents: list[str]):
     res += "+\n"
     return res
 
+def generate_screenshot(package, class_name: str, _class) -> str:
+    """
+    Generates screenshots for a class, and returns corresponding markdown
+    """
+    module_name = package.__name__.split('.')[-1]
+    script_path = Path(__file__).parent / '..' / 'screenshots' / module_name / (class_name.lower() + '.py')
+    if not script_path.exists():
+        return ""
+
+    image_path = Path(__file__).parent / '..' / 'api' / 'master' / module_name
+    spec = importlib.util.spec_from_file_location('script', script_path)
+    executed_module = importlib.util.module_from_spec(spec)
+    spec.loader.exec_module(executed_module)
+    func = getattr(executed_module, 'generate_screenshot')
+    return func(image_path)
+
 
 def generate_docs():
     """Generate RST documentation by introspection of QGIS libs.
@@ -373,6 +395,8 @@ def generate_docs():
                             break
 
                     header = "\n".join(lines[:init_idx])
+
+                header += generate_screenshot(package, class_name, _class)
 
                 if bases_and_subclass_header:
                     if header:
