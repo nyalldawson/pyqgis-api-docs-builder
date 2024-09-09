@@ -246,13 +246,14 @@ def process_bases(app, name, obj, option, bases: list) -> None:
 
 class OverloadedPythonMethodDocumenter(MethodDocumenter):
     objtype = "method"
-    priority = MethodDocumenter.priority + 10
+    priority = MethodDocumenter.priority
 
     @classmethod
     def can_document_member(cls, member, membername, isattr, parent):
         return MethodDocumenter.can_document_member(member, membername, isattr, parent)
 
-    def parse_signatures(self, docstring):
+    @staticmethod
+    def parse_signatures(docstring):
         """
         Extracts each signature from a sip generated docstring
         """
