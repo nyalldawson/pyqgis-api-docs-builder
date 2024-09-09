@@ -184,10 +184,21 @@ def process_docstring(app, what, name, obj, options, lines):
 
     # add return type and param type
     elif what != "class" and not isinstance(obj, enum.EnumMeta) and obj.__doc__:
-
-        signature = obj.__doc__.split("\n")[0]
+        # default to taking the signature from the lines we've already processed.
+        # This is because we want the output processed earlier via the
+        # OverloadedPythonMethodDocumenter class, so that we are only
+        # looking at the docs relevant to the specific overload we are
+        # currently processing
+        signature = lines[0]
         if signature != "":
             match = py_ext_sig_re.match(signature)
+            if not match:
+                # fallback to default docstring, just to be safe...
+                signature = obj.__doc__.split("\n")[0]
+                match = py_ext_sig_re.match(signature)
+            else:
+                del lines[0]
+
             if not match:
                 # print(obj)
                 if name not in cfg["non-instantiable"]:
@@ -292,11 +303,10 @@ class OverloadedPythonMethodDocumenter(MethodDocumenter):
             if match:
                 if current_sig:
                     res.append((current_sig, current_desc))
-                else:
-                    current_sig = match.group(1)
-                    current_desc = match.group(2)
-                    if current_desc:
-                        current_desc += "\n"
+                current_sig = match.group(1)
+                current_desc = match.group(2)
+                if current_desc:
+                    current_desc += "\n"
             else:
                 current_desc += line + "\n"
 
@@ -342,7 +352,8 @@ class OverloadedPythonMethodDocumenter(MethodDocumenter):
 
                 self.add_line("", sourcename)
 
-                for line in self.process_doc([description.split("\n")]):
+                doc_for_this_override = self.object_name + signature + "\n" + description
+                for line in self.process_doc([doc_for_this_override.split("\n")]):
                     self.add_line(line, sourcename)
 
     def add_directive_header(self, sig):
