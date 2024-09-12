@@ -260,7 +260,7 @@ def linkcode_resolve(domain, info):
 def setup(app):
     try:
         from autoautosummary import AutoAutoSummary
-        from documenters import OverloadedPythonMethodDocumenter
+        from documenters import OverloadedPythonMethodDocumenter, SipAttributeDocumenter
         from process_links import (
             process_bases,
             process_docstring,
@@ -270,6 +270,7 @@ def setup(app):
 
         app.add_directive("autoautosummary", AutoAutoSummary)
         app.add_autodocumenter(OverloadedPythonMethodDocumenter)
+        app.add_autodocumenter(SipAttributeDocumenter)
         app.connect("autodoc-process-signature", process_signature)
         app.connect("autodoc-process-docstring", process_docstring)
         app.connect("autodoc-skip-member", skip_member)

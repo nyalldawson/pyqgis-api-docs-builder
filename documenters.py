@@ -1,7 +1,111 @@
 import inspect
 import re
+from collections.abc import Iterator
+from typing import Any
 
-from sphinx.ext.autodoc import MethodDocumenter
+from sphinx.ext.autodoc import AttributeDocumenter, MethodDocumenter
+
+
+def create_links(doc: str) -> str:
+    # fix inheritance
+    doc = re.sub(r"qgis\._(core|gui|analysis|processing)\.", r"", doc)
+    # class
+    doc = re.sub(r"\b(Qgi?s[A-Z]\w+)([, )]|\. )", r":py:class:`.\1`\2", doc)
+
+    return doc
+
+
+def inject_args(_args, _lines):
+    for arg in _args:
+        try:
+            argname, hint = arg.split(": ")
+        except ValueError:
+            continue
+        searchfor = f":param {argname}:"
+        insert_index = None
+
+        for i, line in enumerate(_lines):
+            if line.startswith(searchfor):
+                insert_index = i
+                break
+
+        if insert_index is None:
+            _lines.append(searchfor)
+            insert_index = len(_lines)
+
+        if insert_index is not None:
+            _lines.insert(insert_index, f":type {argname}: {create_links(hint)}")
+
+
+class SipAttributeDocumenter(AttributeDocumenter):
+    """
+    An attribute documenter which handles attributes docs stored
+    by the QGIS sipify script
+    """
+
+    objtype = "attribute"
+    priority = AttributeDocumenter.priority
+
+    @classmethod
+    def can_document_member(
+        cls,
+        member: Any,
+        membername: str,
+        isattr: bool,
+        parent: Any,
+    ) -> bool:
+        res = super().can_document_member(member, membername, isattr, parent)
+        print(member, membername, isattr, parent, res)
+        return res
+
+    def format_signature(self, **kwargs: Any) -> str:
+        try:
+            if self.object_name in self.parent.__signal_arguments__:
+                args = self.parent.__signal_arguments__[self.object_name]
+                args = f'({", ".join(args)})'
+                retann = None
+                result = self.env.events.emit_firstresult(
+                    "autodoc-process-signature",
+                    self.objtype,
+                    self.fullname,
+                    self.object,
+                    self.options,
+                    args,
+                    retann,
+                )
+                if result:
+                    args, retann = result
+
+                if args:
+                    return args
+                else:
+                    return ""
+        except AttributeError:
+            pass
+
+        return super().format_signature(**kwargs)
+
+    def get_doc(self) -> list[list[str]] | None:
+        try:
+            if self.object_name in self.parent.__attribute_docs__:
+                SipAttributeDocumenter.parent_obj = self.parent
+                docs = self.parent.__attribute_docs__[self.object_name]
+                return [docs.split("\n")]
+        except AttributeError:
+            pass
+
+        return super().get_doc()
+
+    def process_doc(self, docstrings: list[list[str]]) -> Iterator[str]:
+        try:
+            args = self.parent.__signal_arguments__.get(self.object_name.split(".")[-1], [])
+            for line in docstrings:
+                inject_args(args, line)
+        except AttributeError:
+            pass
+
+        for docstringlines in docstrings:
+            yield from docstringlines
 
 
 class OverloadedPythonMethodDocumenter(MethodDocumenter):
@@ -16,6 +120,16 @@ class OverloadedPythonMethodDocumenter(MethodDocumenter):
     @classmethod
     def can_document_member(cls, member, membername, isattr, parent):
         return MethodDocumenter.can_document_member(member, membername, isattr, parent)
+
+    def generate(
+        self,
+        more_content=None,
+        real_modname: str | None = None,
+        check_module: bool = False,
+        all_members: bool = False,
+    ) -> None:
+        super().generate(more_content, real_modname, all_members)
+        # print('\n'.join(l for l in self.directive.result))
 
     def parse_signature_blocks(self, docstring):
         """
