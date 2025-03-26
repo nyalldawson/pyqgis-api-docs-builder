@@ -15,6 +15,38 @@ with open("pyqgis_conf.yml") as f:
 
 from sphinx.ext.autodoc import AttributeDocumenter, Documenter
 
+from sphinx.domains.python import PyMethod
+
+old_get_sig = PyMethod.get_signature_prefix
+
+from docutils import nodes
+from sphinx import addnodes
+
+def new_get_signature_prefix(self, sig: str):
+        #print(self.options)
+        #print(dir(self))
+        prefix = []
+        if 'final' in self.options:
+            prefix.append(nodes.Text('final'))
+            prefix.append(addnodes.desc_sig_space())
+        if 'abstractmethod' in self.options:
+            prefix.append(nodes.Text('abstract'))
+            prefix.append(addnodes.desc_sig_space())
+        if 'async' in self.options:
+            prefix.append(nodes.Text('async'))
+            prefix.append(addnodes.desc_sig_space())
+        if 'classmethod' in self.options:
+            prefix.append(nodes.Text('classmethod'))
+            prefix.append(addnodes.desc_sig_space())
+        if 'staticmethod' in self.options:
+            prefix.append(nodes.Text('static'))
+            prefix.append(addnodes.desc_sig_space())
+        #prefix.append(nodes.Text('virtual'))
+        #prefix.append(addnodes.desc_sig_space())
+        return prefix
+
+PyMethod.get_signature_prefix = new_get_signature_prefix
+
 old_get_doc = Documenter.get_doc
 
 
@@ -119,6 +151,16 @@ def create_links(doc: str) -> str:
 
 def process_docstring(app, what, name, obj, options, lines):
     if what == "class":
+        print(obj)
+        lines.append('')
+        try:
+            abstract_methods = obj.__abstract_methods__
+            for method in abstract_methods:
+                lines.append(':abstractmethod: ' + method)
+        except AttributeError:
+            pass
+
+
         # hacky approach to detect nested classes, eg QgsCallout.QgsCalloutContext
         is_nested = len(name.split(".")) > 3
         if not is_nested:
@@ -180,9 +222,15 @@ def process_docstring(app, what, name, obj, options, lines):
             inject_args(args, lines)
         except AttributeError:
             pass
-
     # add return type and param type
     elif what != "class" and not isinstance(obj, enum.EnumMeta) and obj.__doc__:
+        try:
+            abstract_methods = obj.__abstract_methods__
+            print(abstract_methods)
+
+        except AttributeError:
+            pass
+
         # default to taking the signature from the lines we've already processed.
         # This is because we want the output processed earlier via the
         # OverloadedPythonMethodDocumenter class, so that we are only
